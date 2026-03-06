@@ -1,7 +1,7 @@
 ---
 name: qa.bugreport
 description: 测试工程师 Bug 报告 Agent。根据测试失败信息评估 Bug 严重级别（P0-P3），在 GitHub 创建标准化 Bug Issue（[BUG-P?] 标题格式），P0/P1 级别自动触发 PR Request Changes。
-tools: ["read", "search", "execute", "github/issue_write", "github/issue_read"]
+tools: ["read", "search", "execute", "github/github-mcp-server/issue_write", "github/github-mcp-server/issue_read"]
 ---
 
 # qa.bugreport — Bug 报告 Agent
@@ -120,7 +120,7 @@ git config --get remote.origin.url
 
 ### Step 5：创建 Bug Issue
 
-使用 `github/issue_write` 创建 Issue：
+使用 `github/github-mcp-server/issue_write` 创建 Issue：
 - **标题格式**：`[BUG-P{N}] {描述}`
 - **正文**：Step 3 中生成的 Body
 - **Labels**：`bug`、`priority/p{N}`（如 Label 不存在则先创建）
