@@ -1,0 +1,1915 @@
+name: 创建任务 Issues
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/create-issues.yml'
+
+permissions:
+  issues: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 创建 Labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create_label() {
+            local name="$1" color="$2" description="$3"
+            gh label create "$name" --color "$color" --description "$description" --repo "$REPO" 2>/dev/null || \
+            gh label edit "$name" --color "$color" --description "$description" --repo "$REPO" 2>/dev/null || true
+          }
+          create_label "task" "5319E7" "所有 Task Issue"
+          create_label "stage: setup" "EDEDED" "阶段一：环境搭建"
+          create_label "stage: foundation" "BFD4F2" "阶段二：基础模块"
+          create_label "stage: feature" "0075CA" "用户故事功能任务"
+          create_label "stage: polish" "E4E669" "收尾与横向关注点"
+          create_label "priority: p1" "B60205" "高优先级"
+          create_label "priority: p2" "D93F0B" "中优先级"
+          create_label "priority: p3" "FBCA04" "低优先级"
+          create_label "us-01" "0E8A16" "US-01: 关键词数据采集任务"
+          create_label "us-02" "0E8A16" "US-02: 内容热度趋势分析"
+          create_label "us-03" "0E8A16" "US-03: 品牌关键词情感分析"
+          create_label "us-04" "0E8A16" "US-04: 多平台数据对比报告导出"
+          create_label "us-05" "0E8A16" "US-05: 采集任务定时调度"
+          create_label "us-06" "0E8A16" "US-06: 热门内容榜单浏览"
+          create_label "us-07" "0E8A16" "US-07: 用户账号与权限管理"
+
+      - name: 创建 Issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create_issue() {
+            local title="$1"
+            local body="$2"
+            local labels="$3"
+            existing=$(gh issue list --repo "$REPO" --state open --limit 300 --json title --jq ".[].title" 2>/dev/null | grep -Fx "$title" | head -1)
+            if [ -n "$existing" ]; then
+              echo "⏭️  跳过（已存在）：$title"
+            else
+              gh issue create --repo "$REPO" --title "$title" --body "$body" --label "$labels"
+              echo "✅ 已创建：$title"
+            fi
+          }
+
+          # T-001
+          create_issue \
+            '[TASK] T-001: 初始化项目目录结构' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+初始化项目目录结构（pyproject.toml / requirements.txt、src/ 分层布局：api/services/models/collectors/utils/dashboard/workers）
+
+**目标文件**：`项目根目录`
+**所属阶段**：阶段一：环境搭建
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: setup'
+
+          # T-002
+          create_issue \
+            '[TASK] T-002: 配置 Docker Compose 本地环境' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+配置 Docker Compose 本地环境（PostgreSQL 16 + 应用服务 + Redis）
+
+**目标文件**：`docker-compose.yml`
+**所属阶段**：阶段一：环境搭建
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: setup'
+
+          # T-003
+          create_issue \
+            '[TASK] T-003: 配置代码风格工具' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+配置代码风格工具（ruff + black + pre-commit）
+
+**目标文件**：`.ruff.toml / .pre-commit-config.yaml`
+**所属阶段**：阶段一：环境搭建
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: setup'
+
+          # T-004
+          create_issue \
+            '[TASK] T-004: 配置 CI 基础检查' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+配置 CI 基础检查（lint + test）
+
+**目标文件**：`.github/workflows/ci.yml`
+**所属阶段**：阶段一：环境搭建
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: setup'
+
+          # T-005
+          create_issue \
+            '[TASK] T-005: 初始化数据库迁移框架' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+初始化数据库迁移框架（Alembic 集成 SQLAlchemy）
+
+**目标文件**：`alembic.ini / migrations/env.py`
+**所属阶段**：阶段一：环境搭建
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: setup'
+
+          # T-010
+          create_issue \
+            '[TASK] T-010: 创建全部数据库 Schema 迁移脚本' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+创建全部数据库 Schema 迁移脚本（User / CollectTask / PlatformResult / ContentItem / SentimentResult / TrendSummary 六张表）
+
+**目标文件**：`migrations/versions/001_init_schema.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-011
+          create_issue \
+            '[TASK] T-011: 实现 JWT 工具函数' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 JWT 工具函数（签发 / 验证 / 过期处理，密钥读自环境变量）
+
+**目标文件**：`src/auth/jwt_utils.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-012
+          create_issue \
+            '[TASK] T-012: 实现 RBAC 权限中间件' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 RBAC 权限中间件（role 枚举：admin/analyst/operator/readonly，readonly 对 POST/PATCH/DELETE 返回 403）
+
+**目标文件**：`src/auth/rbac.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-013
+          create_issue \
+            '[TASK] T-013: 实现违禁关键词过滤工具' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现违禁关键词过滤工具（违禁词库 + 正则匹配）
+
+**目标文件**：`src/utils/keyword_filter.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-014
+          create_issue \
+            '[TASK] T-014: 实现通用 HTTP 客户端封装' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现通用 HTTP 客户端封装（httpx 异步 + 随机请求间隔 2~8 秒 + 反爬降级标志）
+
+**目标文件**：`src/utils/http_client.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-015
+          create_issue \
+            '[TASK] T-015: 编写基础模块单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写基础模块单元测试
+
+**目标文件**：`tests/unit/test_foundation.py`
+**所属阶段**：阶段二：基础模块
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: foundation'
+
+          # T-020
+          create_issue \
+            '[TASK] T-020: 实现 User ORM 模型' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 User ORM 模型（bcrypt 密码哈希，role 枚举）
+
+**目标文件**：`src/models/user.py`
+**所属阶段**：阶段三：US-07 用户账号与权限管理
+**关联用户故事**：US--07
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p3,us-07'
+
+          # T-021
+          create_issue \
+            '[TASK] T-021: 实现用户登录接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现用户登录接口（`POST /api/auth/login`，JWT 签发，限流 10 次/IP/min）
+
+**目标文件**：`src/api/auth.py`
+**所属阶段**：阶段三：US-07 用户账号与权限管理
+**关联用户故事**：US--07
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p3,us-07'
+
+          # T-022
+          create_issue \
+            '[TASK] T-022: 实现用户角色修改接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现用户角色修改接口（`PATCH /api/admin/users/{user_id}/role`，仅 admin 可操作，审计日志）
+
+**目标文件**：`src/api/admin.py`
+**所属阶段**：阶段三：US-07 用户账号与权限管理
+**关联用户故事**：US--07
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p3,us-07'
+
+          # T-023
+          create_issue \
+            '[TASK] T-023: 编写 US-07 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-07 单元测试
+
+**目标文件**：`tests/unit/test_auth.py`
+**所属阶段**：阶段三：US-07 用户账号与权限管理
+**关联用户故事**：US--07
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p3,us-07'
+
+          # T-030
+          create_issue \
+            '[TASK] T-030: 实现 CollectTask + PlatformResult + ContentItem ORM 模型及任务状态枚举' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 CollectTask + PlatformResult + ContentItem ORM 模型及任务状态枚举
+
+**目标文件**：`src/models/collect_task.py、src/models/platform_result.py、src/models/content_item.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-031
+          create_issue \
+            '[TASK] T-031: 实现抖音采集器' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现抖音采集器（httpx 优先，遇 403/412/验证码页面降级 Playwright）
+
+**目标文件**：`src/collectors/douyin.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-032
+          create_issue \
+            '[TASK] T-032: 实现知乎采集器' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现知乎采集器（httpx 优先，降级策略同上）
+
+**目标文件**：`src/collectors/zhihu.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-033
+          create_issue \
+            '[TASK] T-033: 实现小红书采集器' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现小红书采集器（httpx 优先，降级策略同上）
+
+**目标文件**：`src/collectors/xiaohongshu.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-034
+          create_issue \
+            '[TASK] T-034: 实现 Playwright 降级引擎' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 Playwright 降级引擎（实例池管理，预热超时处理）
+
+**目标文件**：`src/collectors/playwright_engine.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-035
+          create_issue \
+            '[TASK] T-035: 实现采集任务服务' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现采集任务服务（任务状态机 pending→running→completed/failed、平台级故障隔离、total_count 汇总）
+
+**目标文件**：`src/services/task_service.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-036
+          create_issue \
+            '[TASK] T-036: 实现创建采集任务接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现创建采集任务接口（`POST /api/tasks`，违禁词过滤、权限校验）
+
+**目标文件**：`src/api/tasks.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-037
+          create_issue \
+            '[TASK] T-037: 实现查询任务详情接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现查询任务详情接口（`GET /api/tasks/{task_id}`，含 platform_results 列表）
+
+**目标文件**：`src/api/tasks.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-038
+          create_issue \
+            '[TASK] T-038: 编写 US-01 单元及集成测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-01 单元及集成测试
+
+**目标文件**：`tests/unit/test_collection.py`
+**所属阶段**：阶段四：US-01 关键词数据采集任务
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-01'
+
+          # T-040
+          create_issue \
+            '[TASK] T-040: 实现 TrendSummary ORM 模型' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 TrendSummary ORM 模型（keyword/platform/date 联合唯一索引）
+
+**目标文件**：`src/models/trend_summary.py`
+**所属阶段**：阶段五：US-02 内容热度趋势分析
+**关联用户故事**：US--02
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-02'
+
+          # T-041
+          create_issue \
+            '[TASK] T-041: 实现趋势聚合服务' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现趋势聚合服务（pandas 按 keyword/platform/date 聚合 ContentItem，填充 TrendSummary）
+
+**目标文件**：`src/services/trend_service.py`
+**所属阶段**：阶段五：US-02 内容热度趋势分析
+**关联用户故事**：US--02
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-02'
+
+          # T-042
+          create_issue \
+            '[TASK] T-042: 实现热度趋势查询接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现热度趋势查询接口（`GET /api/analysis/trend`，数据不足警告逻辑）
+
+**目标文件**：`src/api/analysis.py`
+**所属阶段**：阶段五：US-02 内容热度趋势分析
+**关联用户故事**：US--02
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-02'
+
+          # T-043
+          create_issue \
+            '[TASK] T-043: 编写 US-02 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-02 单元测试
+
+**目标文件**：`tests/unit/test_trend.py`
+**所属阶段**：阶段五：US-02 内容热度趋势分析
+**关联用户故事**：US--02
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-02'
+
+          # T-048
+          create_issue \
+            '[TASK] T-048: 实现 SentimentResult ORM 模型' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 SentimentResult ORM 模型（sentiment 枚举 + confidence 字段）
+
+**目标文件**：`src/models/sentiment_result.py`
+**所属阶段**：阶段六：US-03 品牌关键词情感分析
+**关联用户故事**：US--03
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-03'
+
+          # T-049
+          create_issue \
+            '[TASK] T-049: 实现情感分析服务' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现情感分析服务（snownlp 批量处理，接口抽象支持后续升级 transformers）
+
+**目标文件**：`src/services/sentiment_service.py`
+**所属阶段**：阶段六：US-03 品牌关键词情感分析
+**关联用户故事**：US--03
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-03'
+
+          # T-050
+          create_issue \
+            '[TASK] T-050: 实现情感分析接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现情感分析接口（`POST /api/analysis/sentiment`，低数据量警告，限流 5 次/用户/min）
+
+**目标文件**：`src/api/analysis.py`
+**所属阶段**：阶段六：US-03 品牌关键词情感分析
+**关联用户故事**：US--03
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-03'
+
+          # T-051
+          create_issue \
+            '[TASK] T-051: 编写 US-03 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-03 单元测试
+
+**目标文件**：`tests/unit/test_sentiment.py`
+**所属阶段**：阶段六：US-03 品牌关键词情感分析
+**关联用户故事**：US--03
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p1,us-03'
+
+          # T-056
+          create_issue \
+            '[TASK] T-056: 实现 APScheduler 调度器集成' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 APScheduler 调度器集成（进程内启动、任务锁防并发重复执行）
+
+**目标文件**：`src/services/scheduler_service.py`
+**所属阶段**：阶段七：US-05 采集任务定时调度
+**关联用户故事**：US--05
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-05'
+
+          # T-057
+          create_issue \
+            '[TASK] T-057: 实现创建定时任务接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现创建定时任务接口（`POST /api/tasks/scheduled`，cron 表达式验证）
+
+**目标文件**：`src/api/tasks.py`
+**所属阶段**：阶段七：US-05 采集任务定时调度
+**关联用户故事**：US--05
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-05'
+
+          # T-058
+          create_issue \
+            '[TASK] T-058: 实现任务跳过逻辑' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现任务跳过逻辑（检测同关键词运行中任务，写入 skipped 状态及日志）
+
+**目标文件**：`src/services/task_service.py`
+**所属阶段**：阶段七：US-05 采集任务定时调度
+**关联用户故事**：US--05
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-05'
+
+          # T-059
+          create_issue \
+            '[TASK] T-059: 编写 US-05 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-05 单元测试
+
+**目标文件**：`tests/unit/test_scheduler.py`
+**所属阶段**：阶段七：US-05 采集任务定时调度
+**关联用户故事**：US--05
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-05'
+
+          # T-063
+          create_issue \
+            '[TASK] T-063: 实现榜单查询服务' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现榜单查询服务（按 interaction_total 降序，时间窗口过滤）
+
+**目标文件**：`src/services/leaderboard_service.py`
+**所属阶段**：阶段八：US-06 热门内容榜单浏览
+**关联用户故事**：US--06
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-06'
+
+          # T-064
+          create_issue \
+            '[TASK] T-064: 实现热门榜单接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现热门榜单接口（`GET /api/leaderboard`，platform/hours/limit 参数）
+
+**目标文件**：`src/api/leaderboard.py`
+**所属阶段**：阶段八：US-06 热门内容榜单浏览
+**关联用户故事**：US--06
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-06'
+
+          # T-065
+          create_issue \
+            '[TASK] T-065: 编写 US-06 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-06 单元测试
+
+**目标文件**：`tests/unit/test_leaderboard.py`
+**所属阶段**：阶段八：US-06 热门内容榜单浏览
+**关联用户故事**：US--06
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-06'
+
+          # T-069
+          create_issue \
+            '[TASK] T-069: 实现 PDF 报告生成服务' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 PDF 报告生成服务（WeasyPrint，图表预渲染缓存，超时上限 29 秒）
+
+**目标文件**：`src/services/report_service.py`
+**所属阶段**：阶段九：US-04 多平台数据对比报告导出
+**关联用户故事**：US--04
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-04'
+
+          # T-070
+          create_issue \
+            '[TASK] T-070: 配置异步报告生成队列' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+配置异步报告生成队列（Celery + Redis Worker）
+
+**目标文件**：`src/workers/report_worker.py`
+**所属阶段**：阶段九：US-04 多平台数据对比报告导出
+**关联用户故事**：US--04
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-04'
+
+          # T-071
+          create_issue \
+            '[TASK] T-071: 实现报告导出接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现报告导出接口（`POST /api/reports/export`，无数据时返回 422）
+
+**目标文件**：`src/api/reports.py`
+**所属阶段**：阶段九：US-04 多平台数据对比报告导出
+**关联用户故事**：US--04
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-04'
+
+          # T-072
+          create_issue \
+            '[TASK] T-072: 实现报告下载接口' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现报告下载接口（`GET /api/reports/{report_id}/download`，文件流响应）
+
+**目标文件**：`src/api/reports.py`
+**所属阶段**：阶段九：US-04 多平台数据对比报告导出
+**关联用户故事**：US--04
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-04'
+
+          # T-073
+          create_issue \
+            '[TASK] T-073: 编写 US-04 单元测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写 US-04 单元测试
+
+**目标文件**：`tests/unit/test_report.py`
+**所属阶段**：阶段九：US-04 多平台数据对比报告导出
+**关联用户故事**：US--04
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,priority: p2,us-04'
+
+          # T-080
+          create_issue \
+            '[TASK] T-080: 实现 Streamlit 应用入口及公共布局' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现 Streamlit 应用入口及公共布局（JWT 登录态、导航栏）
+
+**目标文件**：`src/dashboard/app.py`
+**所属阶段**：阶段十：Dashboard 展示层
+**关联用户故事**：US--01 / US--02 / US--03 / US--06
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,us-01,us-02,us-03,us-06'
+
+          # T-081
+          create_issue \
+            '[TASK] T-081: 实现采集任务管理页' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现采集任务管理页（任务创建表单、状态列表）
+
+**目标文件**：`src/dashboard/pages/tasks.py`
+**所属阶段**：阶段十：Dashboard 展示层
+**关联用户故事**：US--01
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,us-01'
+
+          # T-082
+          create_issue \
+            '[TASK] T-082: 实现热度趋势分析页' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现热度趋势分析页（Plotly 折线图，平台筛选）
+
+**目标文件**：`src/dashboard/pages/trend.py`
+**所属阶段**：阶段十：Dashboard 展示层
+**关联用户故事**：US--02
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,us-02'
+
+          # T-083
+          create_issue \
+            '[TASK] T-083: 实现情感分析页' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现情感分析页（Plotly 饼图，代表内容展示）
+
+**目标文件**：`src/dashboard/pages/sentiment.py`
+**所属阶段**：阶段十：Dashboard 展示层
+**关联用户故事**：US--03
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,us-03'
+
+          # T-084
+          create_issue \
+            '[TASK] T-084: 实现热门榜单页' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+实现热门榜单页（平台切换，互动数据表格）
+
+**目标文件**：`src/dashboard/pages/leaderboard.py`
+**所属阶段**：阶段十：Dashboard 展示层
+**关联用户故事**：US--06
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: feature,us-06'
+
+          # T-090
+          create_issue \
+            '[TASK] T-090: 编写集成测试' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+编写集成测试（全流程 E2E：采集→分析→导出）
+
+**目标文件**：`tests/integration/`
+**所属阶段**：阶段十一：收尾与横向关注点
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: polish'
+
+          # T-091
+          create_issue \
+            '[TASK] T-091: 更新 README 和 API 文档' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+更新 README 和 API 文档（接口说明、部署步骤）
+
+**目标文件**：`README.md / docs/api.md`
+**所属阶段**：阶段十一：收尾与横向关注点
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: polish'
+
+          # T-092
+          create_issue \
+            '[TASK] T-092: 安全扫描' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+安全扫描（依赖漏洞检查 pip-audit，JWT 密钥泄露检查）
+
+**目标文件**：`.github/workflows/security.yml`
+**所属阶段**：阶段十一：收尾与横向关注点
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: polish'
+
+          # T-093
+          create_issue \
+            '[TASK] T-093: 性能验证' \
+            "$(cat << 'ISSUEBODY'
+## 任务描述
+
+性能验证（趋势图 5 秒、情感分析 30 秒/100 条基准测试）
+
+**目标文件**：`tests/perf/`
+**所属阶段**：阶段十一：收尾与横向关注点
+**关联用户故事**：无
+
+---
+
+## 完成定义（DoD）
+
+- [ ] 代码已提交 PR 并通过 Code Review
+- [ ] 单元测试覆盖率 ≥ 80%（如适用）
+- [ ] CI 全部检查通过
+- [ ] 无 CRITICAL 级别的 Bug
+
+---
+
+## 相关资源
+
+- 📋 PRD：[查看产品需求文档](docs/prd-social-media-collect-analyze.md)
+- 🏗️ 技术方案：[查看技术方案](docs/plan-social-media-collect-analyze.md)
+- 📂 功能目录：`specs/social-media-collect-analyze/`
+
+---
+*由 proj.taskstoissues 自动创建 • 2026-03-06*
+ISSUEBODY
+            )" \
+            'task,stage: polish'
+
+          echo "🎉 所有 Issues 创建完成！"
