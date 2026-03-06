@@ -1,7 +1,7 @@
 ---
 name: proj.taskstoissues
-description: 云端同步 Agent。读取 tasks.md，通过 GitHub MCP Server 在目标仓库批量创建 GitHub Issues + Labels，将 Issues 加入已有 Project Board，并将 PRD/Plan 内容以文件形式提交到仓库 docs/ 目录（替代 Wiki）。⚠️ 仅在 Git remote 为 GitHub URL 的仓库中执行。
-tools: ["read", "search", "execute", "github/github-mcp-server/issue_write", "github/github-mcp-server/issue_read", "github/github-mcp-server/label_write", "github/github-mcp-server/list_label", "github/github-mcp-server/projects_write", "github/github-mcp-server/projects_list", "github/github-mcp-server/create_or_update_file"]
+description: 云端同步 Agent。读取 tasks.md，通过 GitHub MCP Server 在目标仓库批量创建 GitHub Issues，将 Issues 加入已有 Project Board。⚠️ 仅在 Git remote 为 GitHub URL 的仓库中执行。
+tools: ["read", "search", "edit", "execute", "github/github-mcp-server/issue_write", "github/github-mcp-server/issue_read", "github/github-mcp-server/label_write", "github/github-mcp-server/list_label", "github/github-mcp-server/projects_write", "github/github-mcp-server/projects_list"]
 ---
 
 # proj.taskstoissues — 云端同步 Agent
@@ -20,20 +20,43 @@ tools: ["read", "search", "execute", "github/github-mcp-server/issue_write", "gi
 
 ## 执行步骤
 
-### Step 0：安全验证 Git Remote
+### Step 0：安全验证 Git Remote 与 gh CLI 鉴权
 
-运行：
+**依次运行以下命令，全部通过后再继续：**
+
 ```bash
+# 1. 获取 remote URL
 git config --get remote.origin.url
 ```
 
-- 若输出包含 `github.com`，提取 `owner/repo` 格式（如 `myorg/my-project`），继续执行
+- 若输出包含 `github.com`，提取 `owner/repo` 格式（如 `myorg/my-project`），继续
 - 若输出为空或非 GitHub URL：**⚠️ 停止执行，提示用户**：
   ```
   ❌ 当前目录的 Git remote 不是 GitHub URL
   当前 remote：[输出内容]
   请确认你在正确的 GitHub 仓库目录下操作
   ```
+
+```bash
+# 2. 验证 gh CLI 已登录
+gh auth status
+```
+
+- 若输出包含 `Logged in`，确认 `gh` 可用，继续执行
+- 若输出 `not logged in` 或命令不存在：**⚠️ 停止执行**，提示：
+  ```
+  ❌ gh CLI 未登录或未安装
+  请先运行：gh auth login
+  或确认 GITHUB_TOKEN 环境变量已设置
+  ```
+
+```bash
+# 3. 验证 API 可访问性
+gh api /repos/{owner}/{repo} --jq '.full_name'
+```
+
+- 若返回 `owner/repo`，确认 API 访问正常，继续
+- 若返回 404 / 403：**⚠️ 停止执行**，提示权限不足
 
 提取到的仓库信息：
 - **owner**：[组织或用户名]
@@ -62,15 +85,9 @@ git config --get remote.origin.url
 在执行任何 GitHub 操作前，展示完整预览：
 
 ```
-📋 操作预览 — 确认后执行
+� 操作预览 — 确认后执行
 
 🏦 目标仓库：github.com/[owner]/[repo]
-
-📌 GitHub Project 配置
-  名称：[功能名称] Sprint Board
-  字段：Status（Todo/In Progress/In Review/Done）
-        Priority（P1/P2/P3）
-        Sprint（文本字段）
 
 📝 将创建 [N] 个 Issues：
 
@@ -80,17 +97,10 @@ git config --get remote.origin.url
   ...
 
   阶段三（US-01 — [标题]）：
-  - [TASK] T-020: [描述]  [Label: US-01, Priority: P1]
+  - [TASK] T-020: [描述]
   ...
 
-� 文档（写入仓库 docs/ 目录）：
-  - docs/prd-[功能名称].md（内容来自 specs/.../prd.md）
-  - docs/plan-[功能名称].md（内容来自 specs/.../plan.md）
-
-Labels 将自动创建（如不存在）：
-  - stage: setup / foundation / feature / polish
-  - priority: p1 / p2 / p3
-  - us-01 / us-02（按功能数量）
+Label：仅使用 `task`（如不存在将自动创建）
 
 → 回复"确认"开始执行
 → 回复"取消"退出
@@ -98,25 +108,21 @@ Labels 将自动创建（如不存在）：
 
 ### Step 4：收到确认后执行云端操作
 
-#### 4a：创建/获取 GitHub Labels
+#### 4a：确认 `task` Label 存在（仅此一个）
 
-使用 `label_write`（method: create）创建以下 Labels，用 `list_label` 检查是否已存在，已存在则跳过：
+使用 `list_label` 查询仓库已有 Labels，若 `task` Label 不存在，则使用 `label_write`（method: create）创建：
 
 | Label | 颜色 | 用途 |
 |---|---|---|
-| `stage: setup` | `EDEDED` | 阶段一任务 |
-| `stage: foundation` | `BFD4F2` | 阶段二任务 |
-| `stage: feature` | `0075CA` | 用户故事任务 |
-| `stage: polish` | `E4E669` | 收尾任务 |
-| `priority: p1` | `B60205` | 高优先级 |
-| `priority: p2` | `D93F0B` | 中优先级 |
-| `priority: p3` | `FBCA04` | 低优先级 |
-| `us-01`, `us-02`... | `0E8A16` | 关联用户故事 |
 | `task` | `5319E7` | 所有 Task Issue |
 
-#### 4b：批量创建 Issues
+其他 Labels（阶段、优先级、US 等）不创建，使用 GitHub 默认 Labels 或不加 Label。
 
-对 tasks.md 中每个任务，使用 `issue_write`（method: create）创建一个 Issue：
+#### 4b：批量创建 Issues（issue_write MCP）
+
+对 tasks.md 中每个任务，使用 `issue_write`（method: create）创建一个 Issue。
+
+**去重处理**：创建前先用 `issue_read`（method: list）查询 open Issues，若已存在标题相同的 Issue，跳过并输出警告。
 
 **Issue 标题格式**：`[TASK] T-{ID}: {任务描述}`
 
@@ -143,17 +149,15 @@ Labels 将自动创建（如不存在）：
 
 ## 相关资源
 
-- 📋 PRD：[查看产品需求文档](docs/prd-{功能名称}.md)
-- 🏗️ 技术方案：[查看技术方案](docs/plan-{功能名称}.md)
+- 📋 PRD：`specs/{功能目录}/prd.md`
+- 🏗️ 技术方案：`specs/{功能目录}/plan.md`
 - 📂 功能目录：`specs/{功能目录}/`
 
 ---
 *由 proj.taskstoissues 自动创建 • {日期}*
 ```
 
-**Labels**：`task` + `stage: {阶段}` + `priority: p1/p2/p3` + `us-0X`（如有）
-
-**去重规则**：如已存在标题相同的 open Issue，跳过创建，输出警告。
+**Labels**：`task`（仅此一个）
 
 #### 4c：将 Issues 加入 GitHub Project Board
 
@@ -184,19 +188,6 @@ Labels 将自动创建（如不存在）：
 7. 创建后，通过 GitHub Issue 页面批量添加本次创建的所有 Issues
 ```
 
-#### 4d：将 PRD 和 Plan 提交到仓库 docs/ 目录
-
-使用 `create_or_update_file` 将规划文档提交到仓库（**不使用 Wiki，GitHub MCP Server 不支持 Wiki 操作**）：
-
-1. **docs/prd-{功能名称}.md**：读取 `specs/{功能目录}/prd.md`，页首追加同步时间戳，提交到 `main` 分支
-2. **docs/plan-{功能名称}.md**：读取 `specs/{功能目录}/plan.md`，页首追加同步时间戳，提交到 `main` 分支
-
-参数：
-- `owner`：`[owner]`，`repo`：`[repo]`，`branch`：`main`
-- `message`：`docs: sync PRD and Plan for {功能名称}`
-
-> ℹ️ GitHub Wiki 是独立 Git 仓库，不通过 MCP 访问。如需 Wiki，请手动操作：Settings → Features → Wikis，然后手动复制内容。
-
 ### Step 5：输出同步报告
 
 ```
@@ -206,12 +197,10 @@ Labels 将自动创建（如不存在）：
 
 📝 Issues：成功 [N] 个，跳过 [N] 个，失败 [N] 个
 📌 Project Board：[Project URL]（已添加 Issues）
-📄 Docs：docs/prd-[功能名称].md ✅ + docs/plan-[功能名称].md ✅
-
-🔗 快速链接：
+� 快速链接：
   Issues：https://github.com/[owner]/[repo]/issues?label=task
   Board：[Project URL]
-  Docs：https://github.com/[owner]/[repo]/tree/main/docs
+  规划文档：specs/{功能目录}/prd.md + specs/{功能目录}/plan.md
 
 ---
 🎯 后续工作流：
@@ -231,4 +220,4 @@ Labels 将自动创建（如不存在）：
 | 幂等性 | 重复运行不重复创建同名 Issues |
 | 格式统一 | 所有 Issue 标题格式 `[TASK] T-XXX: 描述` |
 | DoD 完整 | 每个 Issue body 包含完整的 DoD checklist |
-| 可追溯 | 每个 Issue 链接到 docs/ 目录中的 PRD 和 Plan |
+| 可追溯 | 每个 Issue body 链接到 specs/ 目录中的 PRD 和 Plan |
