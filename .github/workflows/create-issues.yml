@@ -48,7 +48,7 @@ jobs:
             local title="$1"
             local body="$2"
             local labels="$3"
-            existing=$(gh issue list --repo "$REPO" --state open --search "in:title" --json title,state --jq ".[].title" 2>/dev/null | grep -Fx "$title" | head -1)
+            existing=$(gh issue list --repo "$REPO" --state open --limit 300 --json title --jq ".[].title" 2>/dev/null | grep -Fx "$title" | head -1)
             if [ -n "$existing" ]; then
               echo "⏭️  跳过（已存在）：$title"
             else
