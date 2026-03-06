@@ -1,7 +1,7 @@
 ---
 name: proj.tasks
 description: 项目经理任务拆分 Agent。读取 specs/<feature>/plan.md 和 prd.md，将技术方案拆分为结构化任务清单（tasks.md），包含阶段分组、任务 ID、优先级、用户故事映射、依赖关系和文件路径。生成草稿后须人工确认方可写入文件。
-tools: ["read", "edit"]
+tools: ["read", "edit", "execute"]
 ---
 
 # proj.tasks — 任务拆分 Agent
@@ -28,7 +28,7 @@ tools: ["read", "edit"]
 
 ### Step 2：加载任务模板
 
-读取 `github_private_v2/templates/tasks-template.md`。
+读取 `../../templates/tasks-template.md`。
 
 ### Step 3：生成任务草稿
 
@@ -87,7 +87,14 @@ tools: ["read", "edit"]
 
 ### Step 5：收到确认后写入文件
 
-收到用户"确认"或"ok"或"是"后，将完整任务清单写入 `specs/[功能目录]/tasks.md`。
+收到用户"确认"或"ok"或"是"后：
+
+先执行以下命令确保目录存在：
+```bash
+mkdir -p specs/[功能目录]
+```
+
+然后将完整任务清单写入 `specs/[功能目录]/tasks.md`。
 
 ### Step 6：输出摘要
 

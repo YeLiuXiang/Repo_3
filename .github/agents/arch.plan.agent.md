@@ -1,7 +1,7 @@
 ---
 name: arch.plan
 description: 架构师技术方案 Agent。读取 specs/<feature>/prd.md，生成完整技术方案文档 plan.md（含架构概览、数据模型、API 接口合约、ADR 架构决策记录、技术风险）。输出 plan.md 作为项目经理任务拆分和开发团队实现的权威技术基线。
-tools: ["read", "edit", "search"]
+tools: ["read", "edit", "search", "execute"]
 ---
 
 # arch.plan — 技术方案生成 Agent
@@ -33,7 +33,7 @@ tools: ["read", "edit", "search"]
 
 ### Step 2：加载技术方案模板
 
-读取 `github_private_v2/templates/plan-template.md`，以其为结构框架。
+读取 `../../templates/plan-template.md`，以其为结构框架。
 
 ### Step 3：识别技术问题
 
@@ -97,7 +97,12 @@ tools: ["read", "edit", "search"]
 
 ### Step 6：输出文件
 
-将技术方案写入 `specs/[功能目录]/plan.md`。
+先执行以下命令确保目录存在：
+```bash
+mkdir -p specs/[功能目录]
+```
+
+然后将技术方案写入 `specs/[功能目录]/plan.md`。
 
 ### Step 7：输出摘要
 

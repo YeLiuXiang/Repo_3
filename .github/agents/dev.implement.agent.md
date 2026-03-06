@@ -1,7 +1,7 @@
 ---
 name: dev.implement
 description: 开发工程师实现 Agent。读取指派的 GitHub Issue（Task）和技术方案 plan.md，创建 feature 分支，按数据层→业务层→接口层顺序实现代码，提交 PR（含 DoD 自检清单）。支持 Copilot coding agent 自主模式或 VS Code Agent Mode 辅助模式。
-tools: ["read", "edit", "search"]
+tools: ["read", "edit", "search", "execute"]
 ---
 
 # dev.implement — 开发实现 Agent

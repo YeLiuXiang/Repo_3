@@ -1,7 +1,7 @@
 ---
 name: qa.testplan
 description: 测试工程师测试计划 Agent。读取 GitHub Issue（Task）或 prd.md 中的验收标准，输出完整测试用例文档（含正常路径/边界值/异常场景/集成场景），生成 AC 覆盖矩阵，保存为 specs/<feature>/testplan.md。
-tools: ["read", "edit", "search"]
+tools: ["read", "edit", "search", "execute"]
 ---
 
 # qa.testplan — 测试计划生成 Agent
@@ -80,7 +80,12 @@ tools: ["read", "edit", "search"]
 
 ### Step 5：输出文件
 
-将测试计划保存到 `specs/[功能目录]/testplan.md`。
+先执行以下命令确保目录存在：
+```bash
+mkdir -p specs/[功能目录]
+```
+
+然后将测试计划保存到 `specs/[功能目录]/testplan.md`。
 
 ### Step 6：输出摘要
 

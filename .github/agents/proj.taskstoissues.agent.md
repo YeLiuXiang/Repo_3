@@ -1,7 +1,7 @@
 ---
 name: proj.taskstoissues
 description: 云端同步 Agent。读取 tasks.md，通过 GitHub MCP Server 在目标仓库批量创建 GitHub Issues，自动创建并配置 Projects Board（Status/Priority/Sprint 字段），将所有 Issues 加入 Board（初始 Status = Todo），并创建/更新 Wiki 页面（PRD 和 Plan）。⚠️ 仅在 Git remote 为 GitHub URL 的仓库中执行。
-tools: ["read", "search", "github/github-mcp-server/issue_write", "github/github-mcp-server/issue_read"]
+tools: ["read", "search", "execute", "github/github-mcp-server/issue_write", "github/github-mcp-server/issue_read"]
 ---
 
 # proj.taskstoissues — 云端同步 Agent

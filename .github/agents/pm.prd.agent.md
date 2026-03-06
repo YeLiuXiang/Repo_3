@@ -1,7 +1,7 @@
 ---
 name: pm.prd
 description: 产品经理 PRD 创建 Agent。将用户的自然语言需求描述转化为结构化产品需求文档（prd.md），包含业务目标、用户故事（Given-When-Then）、验收标准、功能范围与约束。不创建 GitHub Issues，Issues 统一由 proj.taskstoissues 阶段创建。
-tools: ["read", "search", "edit"]
+tools: ["read", "search", "edit", "execute"]
 ---
 
 # pm.prd — 产品需求文档生成 Agent
@@ -38,7 +38,7 @@ tools: ["read", "search", "edit"]
 
 ### Step 3：加载模板
 
-读取 `github_private_v2/templates/prd-template.md`，以其为基础结构填充内容。
+读取 `../../templates/prd-template.md`，以其为基础结构填充内容。
 
 ### Step 4：生成 PRD 内容
 
@@ -69,7 +69,12 @@ tools: ["read", "search", "edit"]
 
 ### Step 5：输出文件
 
-将 PRD 写入 `specs/[功能目录名]/prd.md`。若目录不存在则创建。
+先执行以下命令确保目录存在：
+```bash
+mkdir -p specs/[功能目录名]
+```
+
+然后将 PRD 写入 `specs/[功能目录名]/prd.md`。
 
 ### Step 6：自检
 
