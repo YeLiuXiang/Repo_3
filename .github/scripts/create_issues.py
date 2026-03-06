@@ -6,7 +6,6 @@ Usage: python create_issues.py --repo OWNER/REPO --tasks-file PATH/TO/tasks.md
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
@@ -161,7 +160,9 @@ def get_existing_issues(repo):
         if not issues:
             break
         for issue in issues:
-            existing[issue["title"]] = issue["number"]
+            # Skip pull requests (the issues endpoint also returns PRs)
+            if "pull_request" not in issue:
+                existing[issue["title"]] = issue["number"]
         if len(issues) < 100:
             break
         page += 1
