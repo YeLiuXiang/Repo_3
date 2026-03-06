@@ -15,17 +15,17 @@ tools: ["read", "search", "edit", "execute", "github/github-mcp-server/issue_wri
 - 执行前展示完整操作预览，等待用户确认
 - 所有创建操作幂等：重复运行只更新不重复创建（通过标题去重）
 - Issues 标题格式统一：`[TASK] T-XX: 任务描述`
+- **禁止创建变通方案**：若 MCP 和 gh CLI 均无法创建 Issues，必须立即停止并清晰报告原因，**绝不**创建 GitHub Actions workflow 或脚本作为替代途径
 
 ---
 
 ## 执行步骤
 
-### Step 0：安全验证 Git Remote 与 gh CLI 鉴权
+### Step 0：安全验证 Git Remote 与创建权限
 
-**依次运行以下命令，全部通过后再继续：**
+**验证 Remote URL**：
 
 ```bash
-# 1. 获取 remote URL
 git config --get remote.origin.url
 ```
 
@@ -33,34 +33,21 @@ git config --get remote.origin.url
 - 若输出为空或非 GitHub URL：**⚠️ 停止执行，提示用户**：
   ```
   ❌ 当前目录的 Git remote 不是 GitHub URL
-  当前 remote：[输出内容]
   请确认你在正确的 GitHub 仓库目录下操作
   ```
 
-```bash
-# 2. 验证 gh CLI 已登录
-gh auth status
-```
-
-- 若输出包含 `Logged in`，确认 `gh` 可用，继续执行
-- 若输出 `not logged in` 或命令不存在：**⚠️ 停止执行**，提示：
-  ```
-  ❌ gh CLI 未登录或未安装
-  请先运行：gh auth login
-  或确认 GITHUB_TOKEN 环境变量已设置
-  ```
+**预检查 gh CLI 可用性**（不影响主流程，供回退时使用）：
 
 ```bash
-# 3. 验证 API 可访问性
-gh api /repos/{owner}/{repo} --jq '.full_name'
+gh auth status 2>&1 | head -3
 ```
 
-- 若返回 `owner/repo`，确认 API 访问正常，继续
-- 若返回 404 / 403：**⚠️ 停止执行**，提示权限不足
+- 记录执行结果（`Logged in` 或 `not logged in`），继续执行 Step 1
 
 提取到的仓库信息：
 - **owner**：[组织或用户名]
 - **repo**：[仓库名]
+- **gh 可用**：[yes/no]
 - **GitHub URL**：`https://github.com/[owner]/[repo]`
 
 ### Step 1：读取任务清单
@@ -118,11 +105,44 @@ Label：仅使用 `task`（如不存在将自动创建）
 
 其他 Labels（阶段、优先级、US 等）不创建，使用 GitHub 默认 Labels 或不加 Label。
 
-#### 4b：批量创建 Issues（issue_write MCP）
+#### 4b：批量创建 Issues
 
-对 tasks.md 中每个任务，使用 `issue_write`（method: create）创建一个 Issue。
+**创建方法优先级**（按顺尝试，成功即用）：
 
-**去重处理**：创建前先用 `issue_read`（method: list）查询 open Issues，若已存在标题相同的 Issue，跳过并输出警告。
+**方法 A：`issue_write` MCP 工具**（首选）
+
+若 `issue_write` 工具可用，对每个任务调用一次：
+- 去重：先用 `issue_read`（method: list）查询 open Issues，标题匹配则跳过
+- 创建：`issue_write`（method: create），labels: `["task"]`
+
+**方法 B：`gh issue create` CLI**（`issue_write` 不可用时尝试）
+
+承接 Step 0 已记录的 `gh 可用: yes/no`：
+- 若 `gh 可用: yes`，单次运行一个小数量 issue 进行评估：
+  ```bash
+  gh issue create --repo {owner}/{repo} --title "[TASK] T-001: 测试" --body "测试" --label "task" 2>&1 | head -3
+  ```
+  - 若成功，用同样方式幹巬创建剩余 Issues，并删除测试 Issue
+  - 若失败，进入方法 C
+
+**方法 C：A/B 均失败 — 立即停止**
+
+输出以下报告并结束，不得采取任何变通途径：
+
+```
+❌ 无法创建 Issues：
+  - issue_write MCP：[not available / 错误信息]
+  - gh CLI：[not available / 错误信息]
+
+可能原因：
+  1. GitHub MCP Server 未正确连接（检查 Copilot agent 的 MCP 工具配置）
+  2. 运行环境防火墙阻断了对 api.github.com 的访问（常见于需要专有权限的 Copilot 任务）
+  3. Token 权限不足（issues: write 未授权）
+
+请用户检查以上原因后重新运行此 Agent。
+```
+
+> **绝对禁止**：创建 GitHub Actions workflow 或任何脚本文件作为变通途径。
 
 **Issue 标题格式**：`[TASK] T-{ID}: {任务描述}`
 
