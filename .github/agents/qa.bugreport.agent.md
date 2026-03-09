@@ -51,7 +51,7 @@ git config --get remote.origin.url
 1. **失败的测试用例**（读取 `specs/[功能目录]/testplan.md` 中对应的 TC 编号，如未指定则读取整个 testplan.md）
 2. **相关 AC 编号**（读取 `specs/[功能目录]/prd.md`）
 3. **错误信息**（用户提供的日志、截图描述、错误堆栈）
-4. **关联 Task Issue**（如用户提供 T-XXX 编号）
+4. **关联 Task Issue**（优先使用 `#123`，若只提供 `T-XXX` 则先检索对应 Issue 编号）
 
 ### Step 2：评估严重级别
 
@@ -99,7 +99,7 @@ git config --get remote.origin.url
 |---|---|
 | 失败测试用例 | TC-{XX} |
 | 关联 AC | AC-{XX} |
-| 关联 Task Issue | #T-{XXX}（若有）|
+| 关联 Task Issue | #{Issue编号}（若有）|
 | 测试环境 | {用户提供或待填写} |
 | 发现时间 | {当前日期} |
 
@@ -124,7 +124,7 @@ git config --get remote.origin.url
 - **标题格式**：`[BUG-P{N}] {描述}`
 - **正文**：Step 3 中生成的 Body
 - **Labels**：`bug`、`priority/p{N}`（如 Label 不存在则先创建）
-- **关联**：若有对应 Task Issue，在正文中添加 `Relates to #T-{XXX}`
+- **关联**：若有对应 Task Issue，在正文中添加 `Relates to #{Issue编号}`
 
 ### Step 6：P0/P1 触发 PR Request Changes
 

@@ -23,7 +23,7 @@ tools: ["read", "edit", "search", "execute"]
 ### Step 1：理解任务上下文
 
 读取以下信息：
-- **当前 Issue**：从 `$ARGUMENTS` 中获取 Issue 编号，或从当前功能目录找到对应任务
+- **当前 Issue**：从 `$ARGUMENTS` 中获取 Issue 编号（必填）
   - Issue 标题：`[TASK] T-XXX: 任务描述`
   - DoD checklist
   - 关联用户故事
@@ -31,7 +31,7 @@ tools: ["read", "edit", "search", "execute"]
   - 当前任务对应的接口定义
   - 相关数据实体
   - 架构模块关系
-- **任务清单**：读取 `specs/[功能目录]/tasks.md`，确认依赖任务是否已完成（`[x]`）
+- **可选参考**：读取 `specs/[功能目录]/tasks.md` 了解原始拆分背景（不作为执行状态依据）
 
 ### Step 2：创建功能分支
 
@@ -122,8 +122,9 @@ Part of 功能：{功能目录名}
 
 ### Step 6：更新任务状态
 
-- 在 tasks.md 中将对应任务标记为 `[x]`（如有权限）
 - 在 Issue 中评论：`PR #{PR编号} 已提交，请安排 Review`
+- 将 Issue 状态更新为已完成/待验证（按仓库约定）
+- 如需文档回填，可同步更新 `tasks.md`，但以 Issue 状态为准
 
 ---
 

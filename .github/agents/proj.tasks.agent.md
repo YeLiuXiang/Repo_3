@@ -13,6 +13,7 @@ tools: ["read", "edit", "execute"]
 **核心原则**：
 - 任务粒度：每个 Task ≤ 1 天，超过则拆分
 - 每个 Task 对应一个文件路径或明确的产出物
+- Issue 是执行单元：开发与协作以 GitHub Issue 为准，`tasks.md` 仅作为规划源
 - 阶段排序：环境搭建 → 基础模块 → 用户故事实现（按 P1/P2/P3）→ 收尾
 - **⚠️ 草稿确认**：生成草稿后发给用户确认，收到"确认"后才写入 tasks.md
 
@@ -115,7 +116,8 @@ mkdir -p specs/[功能目录]
 🔗 关键路径：T001 → T005 → T010 → T022 → T030
 
 推荐下一步：
-→ 运行 /proj.taskstoissues 将任务同步到 GitHub Issues 和 Projects Board
+→ 运行 /proj.taskstoissues 将任务同步到 GitHub Issues（Project Board 由 workflow 自动入板）
+→ 开发同学按 Issue 认领与分配，使用 /dev.implement 基于 Issue 执行
 ```
 
 ---
