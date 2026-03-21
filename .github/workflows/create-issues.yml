@@ -1,0 +1,37 @@
+name: Create Issues from Tasks
+
+on:
+  workflow_dispatch:
+    inputs:
+      tasks_file:
+        description: "Path to tasks.md (relative to repo root)"
+        required: false
+        default: "specs/social-media-collect-analyze/tasks.md"
+  push:
+    branches:
+      - main
+      - "copilot/**"
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create issues from tasks.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python .github/scripts/create_issues.py \
+            --repo "${{ github.repository }}" \
+            --tasks-file "${{ github.event.inputs.tasks_file || 'specs/social-media-collect-analyze/tasks.md' }}"
